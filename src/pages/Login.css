@@ -1,0 +1,23 @@
+
+
+.container-login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.form-login {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;  
+}
+
+.form-login input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
