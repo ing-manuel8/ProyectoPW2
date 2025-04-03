@@ -1,17 +1,29 @@
-import { Outlet} from "react-router-dom";
-import Navbar from "./components/Navbar";
-
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import Navbar from './components/Navbar';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import HomePage from './pages/HomePage';
 
 function App() {
-
   return (
-    <div className="container">
+    <AuthProvider>
       <Navbar />
-      <div className="container-content">
-        <Outlet />
-      </div>
-    </div>
-  )
+      <Routes>
+        <Route path="/*" element={
+          <>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/home" element={<HomePage />} />
+              <Route path="/" element={<Navigate to="/home" replace />} />
+            </Routes>
+            <Outlet />
+          </>
+        } />
+      </Routes>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;

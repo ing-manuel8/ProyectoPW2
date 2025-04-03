@@ -1,20 +1,33 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import './Login.css'
 
 function Login() {
-  const [formData, setState] = useState({
-    username: '',
+  const navigate = useNavigate()
+  const { login } = useAuth()
+  
+  const [formData, setFormData] = useState({  // Corregido: setState -> setFormData
+    email: '',    // Cambiado: username -> email
     password: ''
-  })
+  });
+  
+  
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Aquí iría la lógica de login
-  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const result = await login(formData.email, formData.password);
+    
+    if (result.success) {
+      navigate('/home');
+    } else {
+      alert(result.message || 'Error al iniciar sesión');
+    }
+  };
 
   const handleChange = (e) => {
-    setState({
+    setFormData({
       ...formData,
       [e.target.name]: e.target.value
     })
@@ -25,17 +38,17 @@ function Login() {
       <div className='auth-card'>
         <h1>Iniciar Sesión</h1>
         <form className='auth-form' onSubmit={handleSubmit}>
-          <div className='form-group'>
-            <label htmlFor="username">Usuario</label>
-            <input 
-              type="text" 
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <div className='form-group'>
+          <label htmlFor="email">Correo Electrónico</label>
+          <input 
+            type="email" 
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
           <div className='form-group'>
             <label htmlFor="password">Contraseña</label>
             <input 

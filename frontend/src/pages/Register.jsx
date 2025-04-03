@@ -1,22 +1,41 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import './Login.css'
 
 function Register() {
-  const [formData, setState] = useState({
+  const navigate = useNavigate()
+  const { register } = useAuth()
+  
+  const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
     confirmPassword: ''
   })
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Aquí iría la lógica de registro
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+  
+    const result = await register({
+      username: formData.username,
+      email: formData.email,
+      password: formData.password,
+    });
+
+    if (result.success) {
+      navigate('/home');
+    } else {
+      alert(result.message || 'Error al registrar usuario');
+    }
+  };
 
   const handleChange = (e) => {
-    setState({
+    setFormData({
       ...formData,
       [e.target.name]: e.target.value
     })
