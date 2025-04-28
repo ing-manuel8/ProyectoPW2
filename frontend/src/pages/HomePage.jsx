@@ -1,15 +1,20 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Navigate } from 'react-router-dom';
 import './HomePage.css';
 
 function HomePage() {
   const { user } = useAuth();
 
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <div className="home-page">
       <div className="home-content">
         <div className="welcome-banner">
-          <h1>Bienvenido al Sistema, {user?.username}!</h1>
+          <h1>Bienvenido al Sistema, {user.username}!</h1>
           <p>Panel de Control</p>
         </div>
         
@@ -36,4 +41,4 @@ function HomePage() {
   );
 }
 
-export default HomePage; 
+export default HomePage;
