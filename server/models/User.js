@@ -17,6 +17,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Por favor ingrese una contraseña'],
     minlength: 6,
+  },
+  role: {
+    type: String,
+    enum: ['Doctor', 'Admin', 'Nurse', 'Receptionist'],
+    default: 'Admin'
+  },
+  specialty: {
+    type: String,
+    required: function() { return this.role === 'Doctor' || this.role === 'Nurse'; }
+  },
+  status: {
+    type: String,
+    enum: ['active', 'inactive'],
+    default: 'active'
   }
 }, {
   timestamps: true
@@ -36,4 +50,10 @@ userSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose.model('User', userSchema); 
+// Add this if using newer versions of Mongoose
+userSchema.pre('remove', async function(next) {
+  // Any cleanup before user removal can go here
+  next();
+});
+
+module.exports = mongoose.model('User', userSchema);

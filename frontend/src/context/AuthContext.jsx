@@ -1,10 +1,42 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check session on component mount and token changes
+  useEffect(() => {
+    checkSession();
+  }, []);
+
+  const checkSession = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      
+      if (!token || !storedUser) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Simulate local verification
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+        setIsAuthenticated(true);
+      } catch {
+        logout();
+      }
+    } catch (error) {
+      console.error('Session check error:', error);
+      logout();
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const login = async (email, password) => {
     try {
@@ -22,6 +54,7 @@ export function AuthProvider({ children }) {
         setUser(data.user);
         setIsAuthenticated(true);
         localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user)); // Store user data
         return { success: true };
       } else {
         return { success: false, message: data.message };
@@ -30,6 +63,13 @@ export function AuthProvider({ children }) {
       console.error('Error:', error);
       return { success: false, message: 'Error al iniciar sesión' };
     }
+  };
+
+  const logout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user'); // Remove stored user data
   };
 
   const register = async (userData) => {
@@ -58,21 +98,17 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('token');
-  };
-
   return (
     <AuthContext.Provider value={{ 
       user, 
-      isAuthenticated, 
+      isAuthenticated,
+      isLoading,
       login, 
       logout,
-      register 
+      register,
+      checkSession
     }}>
-      {children}
+      {!isLoading && children}
     </AuthContext.Provider>
   );
 }
@@ -83,4 +119,4 @@ export const useAuth = () => {
     throw new Error('useAuth debe ser usado dentro de un AuthProvider');
   }
   return context;
-}; 
+};

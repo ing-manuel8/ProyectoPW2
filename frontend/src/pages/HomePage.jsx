@@ -1,14 +1,43 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { FaUsers, FaCog, FaChartBar, FaUserCircle } from 'react-icons/fa';
 import './HomePage.css';
 
 function HomePage() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
-  if (!user) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
+
+  const dashboardItems = [
+    {
+      title: 'Usuarios',
+      description: 'Gestión de usuarios del sistema',
+      icon: <FaUsers size={24} />,
+      path: '/users'
+    },
+    {
+      title: 'Configuración',
+      description: 'Ajustes del sistema',
+      icon: <FaCog size={24} />,
+      path: '/settings'
+    },
+    {
+      title: 'Reportes',
+      description: 'Informes y estadísticas',
+      icon: <FaChartBar size={24} />,
+      path: '/reports'
+    },
+    {
+      title: 'Perfil',
+      description: 'Gestionar tu perfil',
+      icon: <FaUserCircle size={24} />,
+      path: '/profile'
+    }
+  ];
 
   return (
     <div className="home-page">
@@ -19,22 +48,17 @@ function HomePage() {
         </div>
         
         <div className="dashboard-grid">
-          <div className="dashboard-card">
-            <h3>Usuarios</h3>
-            <p>Gestión de usuarios del sistema</p>
-          </div>
-          <div className="dashboard-card">
-            <h3>Configuración</h3>
-            <p>Ajustes del sistema</p>
-          </div>
-          <div className="dashboard-card">
-            <h3>Reportes</h3>
-            <p>Informes y estadísticas</p>
-          </div>
-          <div className="dashboard-card">
-            <h3>Perfil</h3>
-            <p>Gestionar tu perfil</p>
-          </div>
+          {dashboardItems.map((item, index) => (
+            <div 
+              key={index} 
+              className="dashboard-card"
+              onClick={() => navigate(item.path)}
+            >
+              <div className="card-icon">{item.icon}</div>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

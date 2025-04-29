@@ -33,7 +33,7 @@ function Navbar() {
               <span>Configuracion</span>
               <ul className={`nav-left-submenus ${showSubmenu ? 'show' : ''}`}>
                 <li>Parametros</li> 
-                <li>Usuarios</li>
+                <li><Link to="/users" style={{ textDecoration: 'none', color: 'inherit' }}>Usuarios</Link></li>
                 <li>Roles</li>
               </ul>
             </li> 

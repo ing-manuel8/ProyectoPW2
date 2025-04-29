@@ -4,7 +4,7 @@ import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import HomePage from './pages/HomePage';
-
+import Users from './pages/actions/Users';
 function App() {
   return (
     <AuthProvider>
@@ -17,6 +17,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/home" element={<HomePage />} />
               <Route path="/" element={<Navigate to="/home" replace />} />
+              <Route path="/users" element={<Users />} />
             </Routes>
             <Outlet />
           </>

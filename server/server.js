@@ -22,6 +22,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Rutas
 app.use('/api/auth', require('./routes/authRoutes'));
+// Fix: Change the path and separate user routes
+app.use('/api/users', require('./routes/userRoutes')); // Changed from /api/auth to /api/users
 
 // Middleware de manejo de errores
 app.use((err, req, res, next) => {
@@ -38,4 +40,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
   console.log(`Documentación disponible en http://localhost:${PORT}/api-docs`);
-}); 
+});
