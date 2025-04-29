@@ -8,14 +8,16 @@ function Users() {
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [currentUser, setCurrentUser] = useState({
     id: '',
-    name: '',
+    username: '',  // Changed from name to match backend
     email: '',
+    password: '',
     role: '',
     specialty: '',
-    password: '',
     status: 'active'
   });
 
@@ -86,26 +88,32 @@ function Users() {
         ? `http://localhost:5000/api/users/${currentUser.id}`
         : 'http://localhost:5000/api/users';
       
+      const userData = {
+        username: currentUser.username,
+        email: currentUser.email,
+        role: currentUser.role,
+        specialty: currentUser.specialty,
+        status: currentUser.status
+      };
+
+      // Only include password if it's provided or it's a new user
+      if (currentUser.password || !editMode) {
+        userData.password = currentUser.password;
+      }
+
       const response = await fetch(url, {
         method: editMode ? 'PUT' : 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          username: currentUser.name,
-          email: currentUser.email,
-          password: currentUser.password,
-          role: currentUser.role,
-          specialty: currentUser.specialty,
-          status: currentUser.status
-        })
+        body: JSON.stringify(userData)
       });
 
       const data = await response.json();
       
       if (data.success) {
-        fetchUsers(); // Refresh the users list
+        fetchUsers();
         handleClose();
       } else {
         alert(data.message || 'Error al procesar la solicitud');
@@ -116,34 +124,48 @@ function Users() {
     }
   };
 
-  const handleDelete = async (userId) => {
-    if (window.confirm('¿Está seguro de eliminar este usuario?')) {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5000/api/users/${userId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+  const handleDelete = (user) => {
+    setUserToDelete(user);
+    setShowDeleteModal(true);
+  };
 
-        const data = await response.json();
-        
-        if (data.success) {
-          fetchUsers(); // Refresh the users list
-        } else {
-          alert(data.message || 'Error al eliminar usuario');
+  // New function to handle actual deletion
+  const confirmDelete = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/users/${userToDelete._id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Error al eliminar usuario');
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setUsers(users.filter(u => u._id !== userToDelete._id));
+        setShowDeleteModal(false);
+        setUserToDelete(null);
+      } else {
+        alert(data.message || 'Error al eliminar usuario');
       }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al eliminar usuario');
     }
   };
 
   const handleEdit = (user) => {
-    setCurrentUser(user);
+    setCurrentUser({
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      specialty: user.specialty || '',
+      status: user.status || 'active',
+      password: '' // Clear password when editing
+    });
     setEditMode(true);
     setShowModal(true);
   };
@@ -215,7 +237,7 @@ function Users() {
                   <Button 
                     variant="outline-danger" 
                     size="sm" 
-                    onClick={() => handleDelete(user.id)}
+                    onClick={() => handleDelete(user)}  // Pass the entire user object
                   >
                     <FaTrash /> Delete
                   </Button>
@@ -225,98 +247,134 @@ function Users() {
           </tbody>
         </Table>
 
-        <Modal show={showModal} onHide={handleClose} size="lg">
-          <Modal.Header closeButton className="bg-light">
-            <Modal.Title>{editMode ? 'Edit Staff Member' : 'Add New Staff Member'}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form onSubmit={handleSubmit}>
-              <div className="row">
-                <div className="col-md-6">
-                  <Form.Group className="mb-3">
-                    <Form.Label>Full Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="name"
-                      value={currentUser.name || ''}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </Form.Group>
-                </div>
-                <div className="col-md-6">
-                  <Form.Group className="mb-3">
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control
-                      type="email"
-                      name="email"
-                      value={currentUser.email || ''}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </Form.Group>
-                </div>
-              </div>
-              {!editMode && (
-                <div className="row">
-                  <div className="col-md-12">
-                    <Form.Group className="mb-3">
-                      <Form.Label>Password</Form.Label>
-                      <Form.Control
-                        type="password"
-                        name="password"
-                        value={currentUser.password || ''}
-                        onChange={handleInputChange}
-                        required={!editMode}
-                      />
-                    </Form.Group>
-                  </div>
-                </div>
-              )}
+        {/* Delete Confirmation Modal */}
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Deletion</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Are you sure you want to delete the user <strong>{userToDelete?.username}</strong>?</p>
+          <p className="text-danger mb-0">This action cannot be undone.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-secondary" onClick={() => setShowDeleteModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmDelete}>
+            Delete User
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-              <div className="row">
-                <div className="col-md-6">
-                  <Form.Group className="mb-3">
-                    <Form.Label>Role</Form.Label>
-                    <Form.Select
-                      name="role"
-                      value={currentUser.role}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="">Select Role</option>
-                      <option value="Doctor">Doctor</option>
-                      <option value="Admin">Administrator</option>
-                      <option value="Nurse">Nurse</option>
-                      <option value="Receptionist">Receptionist</option>
-                    </Form.Select>
-                  </Form.Group>
-                </div>
-                <div className="col-md-6">
-                  <Form.Group className="mb-3">
-                    <Form.Label>Specialty</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="specialty"
-                      value={currentUser.specialty}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </Form.Group>
-                </div>
-              </div>
 
-              <div className="d-flex justify-content-end gap-2">
-                <Button variant="outline-secondary" onClick={handleClose}>
-                  Cancel
-                </Button>
-                <Button variant="primary" type="submit">
-                  {editMode ? 'Update Staff Member' : 'Add Staff Member'}
-                </Button>
+      <Modal show={showModal} onHide={handleClose} size="lg">
+        <Modal.Header closeButton className="bg-light">
+          <Modal.Title>{editMode ? 'Edit Staff Member' : 'Add New Staff Member'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleSubmit}>
+            <div className="row">
+              <div className="col-md-6">
+                <Form.Group className="mb-3">
+                  <Form.Label>Username</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="username"
+                    value={currentUser.username || ''}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </Form.Group>
               </div>
-            </Form>
-          </Modal.Body>
-        </Modal>
+              <div className="col-md-6">
+                <Form.Group className="mb-3">
+                  <Form.Label>Email</Form.Label>
+                  <Form.Control
+                    type="email"
+                    name="email"
+                    value={currentUser.email || ''}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </Form.Group>
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col-md-6">
+                <Form.Group className="mb-3">
+                  <Form.Label>
+                    Password {editMode && '(Leave blank to keep current)'}
+                  </Form.Label>
+                  <Form.Control
+                    type="password"
+                    name="password"
+                    value={currentUser.password || ''}
+                    onChange={handleInputChange}
+                    required={!editMode}
+                  />
+                </Form.Group>
+              </div>
+              <div className="col-md-6">
+                <Form.Group className="mb-3">
+                  <Form.Label>Role</Form.Label>
+                  <Form.Select
+                    name="role"
+                    value={currentUser.role || ''}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select Role</option>
+                    <option value="Doctor">Doctor</option>
+                    <option value="Admin">Administrator</option>
+                    <option value="Nurse">Nurse</option>
+                    <option value="Receptionist">Receptionist</option>
+                  </Form.Select>
+                </Form.Group>
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col-md-6">
+                <Form.Group className="mb-3">
+                  <Form.Label>Specialty</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="specialty"
+                    value={currentUser.specialty || ''}
+                    onChange={handleInputChange}
+                    required={currentUser.role === 'Doctor' || currentUser.role === 'Nurse'}
+                  />
+                </Form.Group>
+              </div>
+              <div className="col-md-6">
+                <Form.Group className="mb-3">
+                  <Form.Label>Status</Form.Label>
+                  <Form.Select
+                    name="status"
+                    value={currentUser.status || 'active'}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </Form.Select>
+                </Form.Group>
+              </div>
+            </div>
+
+            <div className="d-flex justify-content-end gap-2">
+              <Button variant="outline-secondary" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="submit">
+                {editMode ? 'Update' : 'Create'} Staff Member
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
+      
       </Card.Body>
     </Card>
   );
