@@ -17,5 +17,5 @@ const options = {
   },
   apis: ['./routes/*.js'], // archivos que contienen anotaciones
 };
-
+//PRUEBA
 module.exports = swaggerJsdoc(options); 
