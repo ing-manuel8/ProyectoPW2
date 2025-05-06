@@ -1,0 +1,14 @@
+{
+    "name": "mi-proyecto",
+    "version": "1.0.0",
+    "scripts": {
+      "install": "npm install && cd server && npm install && cd ../frontend && npm install",
+      "start": "npm-run-all --parallel start:server start:frontend",
+      "start:server": "cd server && npm start",
+      "start:frontend": "cd frontend && npm run dev"
+    },
+    "devDependencies": {
+      "npm-run-all": "^4.1.5"
+    }
+  }
+    

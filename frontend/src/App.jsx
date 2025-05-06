@@ -6,25 +6,34 @@ import Register from './pages/Register';
 import HomePage from './pages/HomePage';
 import Users from './pages/actions/Users';
 function App() {
-  return (
-    <AuthProvider>
-      <Navbar />
-      <Routes>
-        <Route path="/*" element={
-          <>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/home" element={<HomePage />} />
-              <Route path="/" element={<Navigate to="/home" replace />} />
-              <Route path="/users" element={<Users />} />
-            </Routes>
-            <Outlet />
-          </>
-        } />
-      </Routes>
-    </AuthProvider>
-  );
+	return (
+		<AuthProvider>
+			<Navbar />
+			<Routes>
+				<Route
+					path="/*"
+					element={
+						<>
+							<Routes>
+								<Route path="/login" element={<Login />} />
+								<Route
+									path="/register"
+									element={<Register />}
+								/>
+								<Route path="/home" element={<HomePage />} />
+								<Route
+									path="/"
+									element={<Navigate to="/home" replace />}
+								/>
+								<Route path="/users" element={<Users />} />
+							</Routes>
+							<Outlet />
+						</>
+					}
+				/>
+			</Routes>
+		</AuthProvider>
+	);
 }
 
 export default App;

@@ -1,0 +1,3 @@
+ESTE README esta aqui por si ocupas saber algo en especifico de como funciona el proyecto o dejar alguna anotacion 
+de algo en especifico que hayas hecho que quieras que sepa alguien mas, no olvides poner tu nombre si dejas alguna nota.
+
