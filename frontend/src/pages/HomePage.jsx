@@ -11,6 +11,7 @@ import {
 	FaNotesMedical,
 	FaAmbulance
 } from 'react-icons/fa';
+import Chatbot from '../components/Chatbot';
 import '../styles/HomePage.css';
 
 function HomePage() {
@@ -96,6 +97,7 @@ function HomePage() {
 					</div>
 				))}
 			</div>
+			<Chatbot />
 		</div>
 	);
 }
