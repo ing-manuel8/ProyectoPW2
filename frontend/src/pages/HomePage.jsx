@@ -1,7 +1,16 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { FaUsers, FaCog, FaChartBar, FaUserCircle } from 'react-icons/fa';
+import { 
+	FaUsers, 
+	FaCog, 
+	FaChartBar, 
+	FaUserCircle,
+	FaCalendarAlt,
+	FaHospital,
+	FaNotesMedical,
+	FaAmbulance
+} from 'react-icons/fa';
 import '../styles/HomePage.css';
 
 function HomePage() {
@@ -14,52 +23,78 @@ function HomePage() {
 
 	const dashboardItems = [
 		{
+			title: 'Citas Médicas',
+			description: 'Gestionar citas y consultas',
+			icon: <FaCalendarAlt size={24} />,
+			path: '/citas',
+			color: '#4CAF50'
+		},
+		{
 			title: 'Usuarios',
 			description: 'Gestión de usuarios del sistema',
 			icon: <FaUsers size={24} />,
 			path: '/users',
+			color: '#2196F3'
+		},
+		{
+			title: 'Departamentos',
+			description: 'Administrar áreas médicas',
+			icon: <FaHospital size={24} />,
+			path: '/departments',
+			color: '#9C27B0'
+		},
+		{
+			title: 'Historiales',
+			description: 'Expedientes médicos',
+			icon: <FaNotesMedical size={24} />,
+			path: '/records',
+			color: '#FF9800'
+		},
+		{
+			title: 'Emergencias',
+			description: 'Gestión de urgencias',
+			icon: <FaAmbulance size={24} />,
+			path: '/emergencies',
+			color: '#F44336'
 		},
 		{
 			title: 'Configuración',
 			description: 'Ajustes del sistema',
 			icon: <FaCog size={24} />,
 			path: '/settings',
-		},
-		{
-			title: 'Reportes',
-			description: 'Informes y estadísticas',
-			icon: <FaChartBar size={24} />,
-			path: '/reports',
-		},
-		{
-			title: 'Perfil',
-			description: 'Gestionar tu perfil',
-			icon: <FaUserCircle size={24} />,
-			path: '/profile',
-		},
+			color: '#607D8B'
+		}
 	];
 
 	return (
 		<div className="home-page">
-			<div className="home-content">
-				<div className="welcome-banner">
-					<h1>Bienvenido al Sistema, {user.username}!</h1>
-					<p>Panel de Control</p>
-				</div>
+			
 
-				<div className="dashboard-grid">
-					{dashboardItems.map((item, index) => (
-						<div
-							key={index}
-							className="dashboard-card"
-							onClick={() => navigate(item.path)}
-						>
-							<div className="card-icon">{item.icon}</div>
+			<div className="welcome-banner">
+				<h1>Bienvenido, {user.username}!</h1>
+				<p>Panel de Control del Hospital</p>
+			</div>
+
+			<div className="dashboard-grid">
+				{dashboardItems.map((item, index) => (
+					<div
+						key={index}
+						className="dashboard-card"
+						onClick={() => navigate(item.path)}
+						style={{ '--card-color': item.color }}
+					>
+						<div className="card-icon" style={{ backgroundColor: item.color }}>
+							{item.icon}
+						</div>
+						<div className="card-content">
 							<h3>{item.title}</h3>
 							<p>{item.description}</p>
 						</div>
-					))}
-				</div>
+						<div className="card-arrow">
+							→
+						</div>
+					</div>
+				))}
 			</div>
 		</div>
 	);

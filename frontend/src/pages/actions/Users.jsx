@@ -6,13 +6,16 @@ import {
 	FaTrash,
 	FaUserMd,
 	FaUserNurse,
+	FaArrowLeft
 } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Users() {
 	const { user } = useAuth();
 	const [users, setUsers] = useState([]);
+	const navigate = useNavigate();
 	const [showModal, setShowModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [userToDelete, setUserToDelete] = useState(null);
@@ -179,10 +182,18 @@ function Users() {
 		setShowModal(true);
 	};
 
+	const handleGoBack = () => {
+		navigate(-1);
+	};
+
 	return (
 		<Card className="shadow-sm">
 			<Card.Body>
 				<div className="d-flex justify-content-between align-items-center mb-4">
+					<button className="back-button" onClick={handleGoBack}>
+						<FaArrowLeft size={20} />
+						<span>Volver</span>
+					</button>
 					<div>
 						<h2 className="mb-1">Staff Management</h2>
 						<p className="text-muted mb-0">

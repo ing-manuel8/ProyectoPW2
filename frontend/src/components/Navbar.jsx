@@ -1,29 +1,49 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import logo from '../assets/logo-itsa.png';
+import logo from '/assets/hospital.png';
 import '../styles/Navbar.css';
 
 function Navbar() {
 	const [showSubmenu, setShowSubmenu] = useState(false);
 	const { user, isAuthenticated, logout } = useAuth();
 	const navigate = useNavigate();
+	const submenuRef = useRef(null);
 
 	const handleShowSubmenu = () => {
-		setShowSubmenu(!showSubmenu);
+		setShowSubmenu(true);
 	};
+
+	const handleHideSubmenu = () => {
+		setShowSubmenu(false);
+	};
+
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			if (submenuRef.current && !submenuRef.current.contains(event.target)) {
+				setShowSubmenu(false);
+			}
+		};
+
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, []);
 
 	const handleLogout = () => {
 		logout();
-		navigate('/login');
+		navigate('/');
+	};
+
+	const handleLogoClick = () => {
+		navigate('/');
 	};
 
 	return (
 		<div className="container-nav">
 			<div className="nav-left">
-				<div className="nav-left-logo" onClick={() => navigate('/')}>
-					{' '}
-					{/* Changed navigate to window.location.href */}
+				<div className="nav-left-logo" onClick={handleLogoClick}>
 					<img src={logo} alt="logo" />
 				</div>
 
@@ -31,27 +51,53 @@ function Navbar() {
 					<ul className="nav-left-menu">
 						<li
 							className="nav-left-menu-config"
-							onClick={handleShowSubmenu}
 							onMouseEnter={handleShowSubmenu}
-							onMouseLeave={handleShowSubmenu}
+							onMouseLeave={handleHideSubmenu}
+							ref={submenuRef}
 						>
-							<span>Configuracion</span>
+							<span>Configuración</span>
 							<ul
 								className={`nav-left-submenus ${showSubmenu ? 'show' : ''}`}
 							>
-								<li>Parametros</li>
+								<li>
+									<Link
+										to="/parametros"
+										style={{
+											textDecoration: 'none',
+											color: 'inherit',
+											display: 'block',
+											padding: '8px 16px',
+										}}
+									>
+										Parámetros
+									</Link>
+								</li>
 								<li>
 									<Link
 										to="/users"
 										style={{
 											textDecoration: 'none',
 											color: 'inherit',
+											display: 'block',
+											padding: '8px 16px',
 										}}
 									>
 										Usuarios
 									</Link>
 								</li>
-								<li>Roles</li>
+								<li>
+									<Link
+										to="/roles"
+										style={{
+											textDecoration: 'none',
+											color: 'inherit',
+											display: 'block',
+											padding: '8px 16px',
+										}}
+									>
+										Roles
+									</Link>
+								</li>
 							</ul>
 						</li>
 					</ul>

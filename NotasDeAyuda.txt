@@ -1,3 +1,9 @@
 ESTE README esta aqui por si ocupas saber algo en especifico de como funciona el proyecto o dejar alguna anotacion 
 de algo en especifico que hayas hecho que quieras que sepa alguien mas, no olvides poner tu nombre si dejas alguna nota.
 
+pasos para crear todo un flujo que guarde, edite, borre. 
+
+1.Crear el modelo en la carpeta /models. PascalKeys
+2.Crear el controlador, este controlador necesita tener el nombre y la terminacion Controller. Ej. citasMedicasController. camelKeys
+3. Dentro del controlador definir las rutas que te permitan acceder a dicho controlador. POST, PUT, DELETE, GET.
+4.Necesitas registrar las rutas en el archivo principal del servidor. /server.js (archivo)

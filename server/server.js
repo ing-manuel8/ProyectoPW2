@@ -4,6 +4,8 @@ const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 const connectDB = require('./config/db');
+const userRoutes = require('./routes/userRoutes');
+const citasRoutes = require('./routes/citasRoutes');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -22,8 +24,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Rutas
 app.use('/api/auth', require('./routes/authRoutes'));
-// Fix: Change the path and separate user routes
-app.use('/api/users', require('./routes/userRoutes')); // Changed from /api/auth to /api/users
+app.use('/api/users', userRoutes);
+app.use('/api/citas', citasRoutes);
 
 // Middleware de manejo de errores
 app.use((err, req, res, next) => {
