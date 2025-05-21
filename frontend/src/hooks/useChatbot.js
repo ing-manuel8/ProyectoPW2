@@ -6,34 +6,35 @@ const useChatbot = () => {
     const [inputMessage, setInputMessage] = useState('');
     const [mostrarMasOpciones, setMostrarMasOpciones] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [sugerencias, setSugerencias] = useState([]);
     const messagesEndRef = useRef(null);
 
     const opcionesRapidas = [
         {
-            text: "¿Qué departamentos tienen disponibles?",
+            text: "🏥 ¿Qué departamentos tienen disponibles?",
             intent: "departments"
         },
         {
-            text: "¿Cuáles son las especialidades médicas?",
+            text: "👨‍⚕️ ¿Cuáles son las especialidades médicas?",
             intent: "specialties"
         },
         {
-            text: "¿Quiénes son los doctores disponibles?",
+            text: "👤 ¿Quiénes son los doctores disponibles?",
             intent: "doctors"
         }
     ];
 
     const opcionesAdicionales = [
         {
-            text: "¿Cómo agendo una cita?",
-            intent: "appointment"
+            text: "📅 ¿Cómo agendo una cita?",
+            intent: "appointments"
         },
         {
-            text: "¿Cuál es el horario de atención?",
-            intent: "schedule"
+            text: "⏰ ¿Cuál es el horario de atención?",
+            intent: "hours"
         },
         {
-            text: "¿Qué hago en caso de emergencia?",
+            text: "🚑 ¿Qué hago en caso de emergencia?",
             intent: "emergency"
         }
     ];
@@ -41,6 +42,7 @@ const useChatbot = () => {
     const handleClose = () => {
         setShow(false);
         setMostrarMasOpciones(false);
+        setSugerencias([]);
     };
     
     const handleShow = () => {
@@ -51,6 +53,7 @@ const useChatbot = () => {
                 text: "¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?",
                 sender: 'bot'
             }]);
+            setSugerencias(opcionesRapidas);
         }
     };
 
@@ -58,12 +61,16 @@ const useChatbot = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
+    // Efecto para el scroll automático
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
 
     const handleSendMessage = async (message) => {
-        if (!message.trim() || isLoading) return;
+        // Validación más robusta del mensaje
+        if (!message || typeof message !== 'string' || !message.trim() || isLoading) {
+            return;
+        }
 
         setIsLoading(true);
 
@@ -94,13 +101,35 @@ const useChatbot = () => {
             const data = await response.json();
             
             if (data.success) {
-                // Agregar respuesta del bot
-                const botMessage = {
-                    id: messages.length + 2,
-                    text: data.data.response,
-                    sender: 'bot'
-                };
-                setMessages(prev => [...prev, botMessage]);
+                // Procesar múltiples respuestas si existen
+                if (Array.isArray(data.data.responses)) {
+                    // Agregar cada respuesta del bot
+                    data.data.responses.forEach((responseText, index) => {
+                        const botMessage = {
+                            id: messages.length + 2 + index,
+                            text: responseText,
+                            sender: 'bot'
+                        };
+                        setMessages(prev => [...prev, botMessage]);
+                    });
+                } else {
+                    // Si solo hay una respuesta, mantener el comportamiento actual
+                    const botMessage = {
+                        id: messages.length + 2,
+                        text: data.data.response,
+                        sender: 'bot'
+                    };
+                    setMessages(prev => [...prev, botMessage]);
+                }
+
+                // Actualizar sugerencias con las nuevas sugerencias contextuales
+                if (data.data.suggestions && Array.isArray(data.data.suggestions) && data.data.suggestions.length > 0) {
+                    setSugerencias(data.data.suggestions);
+                } else {
+                    // Si no hay sugerencias del servidor, mostrar las opciones rápidas por defecto
+                    setSugerencias(opcionesRapidas);
+                }
+                setMostrarMasOpciones(false); // Ocultar opciones adicionales cuando hay nuevas sugerencias
             } else {
                 throw new Error(data.message || 'Error al procesar el mensaje');
             }
@@ -113,13 +142,11 @@ const useChatbot = () => {
                 sender: 'bot'
             };
             setMessages(prev => [...prev, errorMessage]);
+            // En caso de error, mostrar las opciones rápidas por defecto
+            setSugerencias(opcionesRapidas);
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const handleQuickOption = (option) => {
-        handleSendMessage(option.text);
     };
 
     const toggleMasOpciones = () => {
@@ -131,14 +158,13 @@ const useChatbot = () => {
         messages,
         inputMessage,
         messagesEndRef,
-        opcionesRapidas,
+        opcionesRapidas: sugerencias.length > 0 ? sugerencias : opcionesRapidas,
         opcionesAdicionales,
         mostrarMasOpciones,
         isLoading,
         handleClose,
         handleShow,
         handleSendMessage,
-        handleQuickOption,
         setInputMessage,
         toggleMasOpciones
     };

@@ -20,10 +20,15 @@ const Chatbot = () => {
         handleClose,
         handleShow,
         handleSendMessage,
-        handleQuickOption,
         setInputMessage,
         toggleMasOpciones
     } = useChatbot();
+
+    const handleOptionClick = (option) => {
+        if (option && option.text) {
+            handleSendMessage(option.text);
+        }
+    };
 
     return (
         <>
@@ -66,23 +71,23 @@ const Chatbot = () => {
                                 <QuickOptions 
                                     options={opcionesRapidas}
                                     additionalOptions={opcionesAdicionales}
-                                    showMore={mostrarMasOpciones}
-                                    onSelect={handleQuickOption}
-                                    onToggleMore={toggleMasOpciones}
+                                    mostrarMasOpciones={mostrarMasOpciones}
+                                    onSelectOption={handleOptionClick}
+                                    onToggleMasOpciones={toggleMasOpciones}
                                 />
                             </div>
                         )}
                         {messages.map((message, index) => (
-                            <React.Fragment key={index}>
+                            <React.Fragment key={message.id || index}>
                                 <ChatMessage message={message} />
                                 {index === messages.length - 1 && message.sender === 'bot' && (
                                     <div className="quick-options-wrapper">
                                         <QuickOptions 
                                             options={opcionesRapidas}
                                             additionalOptions={opcionesAdicionales}
-                                            showMore={mostrarMasOpciones}
-                                            onSelect={handleQuickOption}
-                                            onToggleMore={toggleMasOpciones}
+                                            mostrarMasOpciones={mostrarMasOpciones}
+                                            onSelectOption={handleOptionClick}
+                                            onToggleMasOpciones={toggleMasOpciones}
                                         />
                                     </div>
                                 )}
