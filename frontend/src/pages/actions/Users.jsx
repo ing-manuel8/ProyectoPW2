@@ -15,6 +15,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function Users() {
 	const { user } = useAuth();
 	const [users, setUsers] = useState([]);
+	const [specialties, setSpecialties] = useState([]);
 	const navigate = useNavigate();
 	const [showModal, setShowModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -22,7 +23,7 @@ function Users() {
 	const [editMode, setEditMode] = useState(false);
 	const [currentUser, setCurrentUser] = useState({
 		id: '',
-		username: '', // Changed from name to match backend
+		username: '',
 		email: '',
 		password: '',
 		role: '',
@@ -46,7 +47,7 @@ function Users() {
 		setEditMode(false);
 		setCurrentUser({
 			id: '',
-			name: '',
+			username: '',
 			email: '',
 			role: '',
 			specialty: '',
@@ -63,10 +64,33 @@ function Users() {
 		setCurrentUser({ ...currentUser, [name]: value });
 	};
 
-	// Fetch users on component mount
+	// Fetch users and specialties on component mount
 	useEffect(() => {
 		fetchUsers();
+		fetchSpecialties();
 	}, []);
+
+	const fetchSpecialties = async () => {
+		try {
+			const token = localStorage.getItem('token');
+			const response = await fetch('http://localhost:5000/api/specialty', {
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+				},
+			});
+			const data = await response.json();
+
+			if (data.success) {
+				console.log('Especialidades obtenidas:', data.data); // Para debugging
+				setSpecialties(data.data);
+			} else {
+				console.error('Error al obtener especialidades:', data.message);
+			}
+		} catch (error) {
+			console.error('Error:', error);
+		}
+	};
 
 	const fetchUsers = async () => {
 		try {
@@ -82,7 +106,7 @@ function Users() {
 			if (data.success) {
 				setUsers(data.data);
 			} else {
-				console.error('Error fetching users:', data.message);
+				console.error('Error al obtener usuarios:', data.message);
 			}
 		} catch (error) {
 			console.error('Error:', error);
@@ -105,7 +129,6 @@ function Users() {
 				status: currentUser.status,
 			};
 
-			// Only include password if it's provided or it's a new user
 			if (currentUser.password || !editMode) {
 				userData.password = currentUser.password;
 			}
@@ -138,7 +161,6 @@ function Users() {
 		setShowDeleteModal(true);
 	};
 
-	// New function to handle actual deletion
 	const confirmDelete = async () => {
 		try {
 			const token = localStorage.getItem('token');
@@ -176,7 +198,7 @@ function Users() {
 			role: user.role,
 			specialty: user.specialty || '',
 			status: user.status || 'active',
-			password: '', // Clear password when editing
+			password: '',
 		});
 		setEditMode(true);
 		setShowModal(true);
@@ -195,9 +217,9 @@ function Users() {
 						<span>Volver</span>
 					</button>
 					<div>
-						<h2 className="mb-1">Staff Management</h2>
+						<h2 className="mb-1">Gestión de Personal</h2>
 						<p className="text-muted mb-0">
-							Manage clinic staff and their roles
+							Administra el personal de la clínica y sus roles
 						</p>
 					</div>
 					<Button
@@ -206,7 +228,7 @@ function Users() {
 						className="d-flex align-items-center gap-2"
 					>
 						<FaUserPlus />
-						Add New Staff Member
+						Agregar Nuevo Personal
 					</Button>
 				</div>
 
@@ -219,11 +241,11 @@ function Users() {
 				>
 					<thead className="bg-light">
 						<tr>
-							<th>Staff Member</th>
-							<th>Role & Specialty</th>
-							<th>Contact</th>
-							<th>Status</th>
-							<th>Actions</th>
+							<th>Personal</th>
+							<th>Rol y Especialidad</th>
+							<th>Contacto</th>
+							<th>Estado</th>
+							<th>Acciones</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -266,7 +288,7 @@ function Users() {
 												: 'warning'
 										}
 									>
-										{user.status}
+										{user.status === 'active' ? 'Activo' : 'Inactivo'}
 									</Badge>
 								</td>
 								<td>
@@ -276,14 +298,14 @@ function Users() {
 										className="me-2"
 										onClick={() => handleEdit(user)}
 									>
-										<FaEdit /> Edit
+										<FaEdit /> Editar
 									</Button>
 									<Button
 										variant="outline-danger"
 										size="sm"
-										onClick={() => handleDelete(user)} // Pass the entire user object
+										onClick={() => handleDelete(user)}
 									>
-										<FaTrash /> Delete
+										<FaTrash /> Eliminar
 									</Button>
 								</td>
 							</tr>
@@ -291,22 +313,22 @@ function Users() {
 					</tbody>
 				</Table>
 
-				{/* Delete Confirmation Modal */}
+				{/* Modal de Confirmación de Eliminación */}
 				<Modal
 					show={showDeleteModal}
 					onHide={() => setShowDeleteModal(false)}
 					centered
 				>
 					<Modal.Header closeButton>
-						<Modal.Title>Confirm Deletion</Modal.Title>
+						<Modal.Title>Confirmar Eliminación</Modal.Title>
 					</Modal.Header>
 					<Modal.Body>
 						<p>
-							Are you sure you want to delete the user{' '}
+							¿Estás seguro de que deseas eliminar al usuario{' '}
 							<strong>{userToDelete?.username}</strong>?
 						</p>
 						<p className="text-danger mb-0">
-							This action cannot be undone.
+							Esta acción no se puede deshacer.
 						</p>
 					</Modal.Body>
 					<Modal.Footer>
@@ -314,20 +336,21 @@ function Users() {
 							variant="outline-secondary"
 							onClick={() => setShowDeleteModal(false)}
 						>
-							Cancel
+							Cancelar
 						</Button>
 						<Button variant="danger" onClick={confirmDelete}>
-							Delete User
+							Eliminar Usuario
 						</Button>
 					</Modal.Footer>
 				</Modal>
 
+				{/* Modal de Usuario */}
 				<Modal show={showModal} onHide={handleClose} size="lg">
 					<Modal.Header closeButton className="bg-light">
 						<Modal.Title>
 							{editMode
-								? 'Edit Staff Member'
-								: 'Add New Staff Member'}
+								? 'Editar Personal'
+								: 'Agregar Nuevo Personal'}
 						</Modal.Title>
 					</Modal.Header>
 					<Modal.Body>
@@ -335,7 +358,7 @@ function Users() {
 							<div className="row">
 								<div className="col-md-6">
 									<Form.Group className="mb-3">
-										<Form.Label>Username</Form.Label>
+										<Form.Label>Nombre de Usuario</Form.Label>
 										<Form.Control
 											type="text"
 											name="username"
@@ -347,7 +370,7 @@ function Users() {
 								</div>
 								<div className="col-md-6">
 									<Form.Group className="mb-3">
-										<Form.Label>Email</Form.Label>
+										<Form.Label>Correo Electrónico</Form.Label>
 										<Form.Control
 											type="email"
 											name="email"
@@ -363,9 +386,9 @@ function Users() {
 								<div className="col-md-6">
 									<Form.Group className="mb-3">
 										<Form.Label>
-											Password{' '}
+											Contraseña{' '}
 											{editMode &&
-												'(Leave blank to keep current)'}
+												'(Dejar en blanco para mantener la actual)'}
 										</Form.Label>
 										<Form.Control
 											type="password"
@@ -378,7 +401,7 @@ function Users() {
 								</div>
 								<div className="col-md-6">
 									<Form.Group className="mb-3">
-										<Form.Label>Role</Form.Label>
+										<Form.Label>Rol</Form.Label>
 										<Form.Select
 											name="role"
 											value={currentUser.role || ''}
@@ -386,17 +409,17 @@ function Users() {
 											required
 										>
 											<option value="">
-												Select Role
+												Seleccionar Rol
 											</option>
 											<option value="Doctor">
 												Doctor
 											</option>
 											<option value="Admin">
-												Administrator
+												Administrador
 											</option>
-											<option value="Nurse">Nurse</option>
+											<option value="Nurse">Enfermero</option>
 											<option value="Receptionist">
-												Receptionist
+												Recepcionista
 											</option>
 										</Form.Select>
 									</Form.Group>
@@ -406,9 +429,8 @@ function Users() {
 							<div className="row">
 								<div className="col-md-6">
 									<Form.Group className="mb-3">
-										<Form.Label>Specialty</Form.Label>
-										<Form.Control
-											type="text"
+										<Form.Label>Especialidad</Form.Label>
+										<Form.Select
 											name="specialty"
 											value={currentUser.specialty || ''}
 											onChange={handleInputChange}
@@ -416,12 +438,21 @@ function Users() {
 												currentUser.role === 'Doctor' ||
 												currentUser.role === 'Nurse'
 											}
-										/>
+										>
+											<option value="">
+												Seleccionar Especialidad
+											</option>
+											{specialties.map((specialty) => (
+												<option key={specialty._id} value={specialty.nombre}>
+													{specialty.nombre}
+												</option>
+											))}
+										</Form.Select>
 									</Form.Group>
 								</div>
 								<div className="col-md-6">
 									<Form.Group className="mb-3">
-										<Form.Label>Status</Form.Label>
+										<Form.Label>Estado</Form.Label>
 										<Form.Select
 											name="status"
 											value={
@@ -431,10 +462,10 @@ function Users() {
 											required
 										>
 											<option value="active">
-												Active
+												Activo
 											</option>
 											<option value="inactive">
-												Inactive
+												Inactivo
 											</option>
 										</Form.Select>
 									</Form.Group>
@@ -446,11 +477,10 @@ function Users() {
 									variant="outline-secondary"
 									onClick={handleClose}
 								>
-									Cancel
+									Cancelar
 								</Button>
 								<Button variant="primary" type="submit">
-									{editMode ? 'Update' : 'Create'} Staff
-									Member
+									{editMode ? 'Actualizar' : 'Crear'} Personal
 								</Button>
 							</div>
 						</Form>

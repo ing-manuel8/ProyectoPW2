@@ -6,6 +6,9 @@ const swaggerSpec = require('./config/swagger');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const citasRoutes = require('./routes/citasRoutes');
+const specialtyRoutes = require('./routes/specialtyRoutes');
+const departmentRoutes = require('./routes/departmentRoutes');
+const chatbotRoutes = require('./routes/chatbotRoutes');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -26,6 +29,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/users', userRoutes);
 app.use('/api/citas', citasRoutes);
+app.use('/api/specialty', specialtyRoutes);
+app.use('/api/chatbot/departments', departmentRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 // Middleware de manejo de errores
 app.use((err, req, res, next) => {

@@ -5,9 +5,19 @@ const User = require('../models/User');
 exports.getAllAppointments = async (req, res) => {
     try {
         const appointments = await Appointment.find()
-            .populate('patient', 'username')
+            .select('patientName doctor department date time consultationType reason notes duration status')
             .populate('doctor', 'username');
-        res.json({ success: true, data: appointments });
+        
+        // Transformar los datos para mostrar solo patientName
+        const transformedAppointments = appointments.map(appointment => {
+            const appointmentObj = appointment.toObject();
+            return {
+                ...appointmentObj,
+                patient: { username: appointmentObj.patientName }
+            };
+        });
+
+        res.json({ success: true, data: transformedAppointments });
     } catch (error) {
         console.error('Error al obtener citas:', error);
         res.status(500).json({ 
@@ -70,16 +80,9 @@ exports.createAppointment = async (req, res) => {
     try {
         console.log('Datos recibidos:', req.body);
 
-        // Buscar el paciente y doctor por username
-        const patient = await User.findOne({ username: req.body.patientUsername });
+        // Buscar el doctor por username
         const doctor = await User.findOne({ username: req.body.doctorUsername });
 
-        if (!patient) {
-            return res.status(400).json({ 
-                success: false, 
-                message: `Paciente con username "${req.body.patientUsername}" no encontrado` 
-            });
-        }
         if (!doctor) {
             return res.status(400).json({ 
                 success: false, 
@@ -88,7 +91,7 @@ exports.createAppointment = async (req, res) => {
         }
 
         const appointmentData = {
-            patient: patient._id,
+            patientName: req.body.patientName,
             doctor: doctor._id,
             department: req.body.department,
             date: req.body.date,
@@ -106,7 +109,6 @@ exports.createAppointment = async (req, res) => {
         const newAppointment = await appointment.save();
 
         const populatedAppointment = await Appointment.findById(newAppointment._id)
-            .populate('patient', 'username')
             .populate('doctor', 'username');
 
         res.status(201).json({ 

@@ -24,7 +24,7 @@ function Citas() {
 	const [editMode, setEditMode] = useState(false);
 	const [currentCita, setCurrentCita] = useState({
 		id: '',
-		patient: '',
+		patientName: '',
 		patientUsername: '',
 		doctor: '',
 		doctorUsername: '',
@@ -54,7 +54,7 @@ function Citas() {
 		setEditMode(false);
 		setCurrentCita({
 			id: '',
-			patient: '',
+			patientName: '',
 			patientUsername: '',
 			doctor: '',
 			doctorUsername: '',
@@ -134,10 +134,8 @@ function Citas() {
 	const handleInputChange = (e) => {
 		const { name, value } = e.target;
 		if (name === 'patientUsername') {
-			const selectedUser = usuarios.find(u => u.username === value);
 			setCurrentCita(prev => ({
 				...prev,
-				patient: selectedUser?._id || '',
 				patientUsername: value
 			}));
 		} else if (name === 'doctorUsername') {
@@ -158,7 +156,7 @@ function Citas() {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		
-		if (!currentCita.patientUsername || !currentCita.doctorUsername) {
+		if ( !currentCita.doctorUsername) {
 			alert('Por favor, ingrese tanto el paciente como el doctor');
 			return;
 		}
@@ -170,7 +168,7 @@ function Citas() {
 				: 'http://localhost:5000/api/citas';
 
 			const citaData = {
-				patientUsername: currentCita.patientUsername.trim(),
+				patientName: currentCita.patientUsername.trim(),
 				doctorUsername: currentCita.doctorUsername.trim(),
 				department: currentCita.department,
 				date: currentCita.date,
@@ -243,8 +241,8 @@ function Citas() {
 	const handleEdit = (cita) => {
 		setCurrentCita({
 			id: cita._id,
-			patient: cita.patient?._id || '',
-			patientUsername: cita.patient?.username || '',
+			patientName: cita.patient?.username || cita.patientName || '',
+			patientUsername: cita.patient?.username || cita.patientName || '',
 			doctor: cita.doctor?._id || '',
 			doctorUsername: cita.doctor?.username || '',
 			department: cita.department,
@@ -307,7 +305,7 @@ function Citas() {
 										<FaUserInjured className="me-2 text-primary" />
 										<div>
 											<div className="fw-bold">
-												{cita.patient?.username || 'N/A'}
+												{cita.patient?.username}
 											</div>
 										</div>
 									</div>
@@ -392,20 +390,14 @@ function Citas() {
 								<div className="col-md-6">
 									<Form.Group className="mb-3">
 										<Form.Label>Paciente</Form.Label>
-										<Form.Select
+										<Form.Control
+											type="text"
 											name="patientUsername"
 											value={currentCita.patientUsername}
 											onChange={handleInputChange}
 											required
-											disabled={editMode}
-										>
-											<option value="">Seleccionar Paciente</option>
-											{usuarios.map(usuario => (
-												<option key={usuario._id} value={usuario.username}>
-													{usuario.username}
-												</option>
-											))}
-										</Form.Select>
+											placeholder="Ingrese el nombre del paciente"
+										/>
 									</Form.Group>
 								</div>
 								<div className="col-md-6">

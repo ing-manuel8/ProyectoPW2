@@ -7,11 +7,17 @@ import HomePage from './pages/HomePage';
 import Home from './pages/Home';
 import Users from './pages/actions/Users';
 import Citas from './pages/actions/Citas';
+import AdminDepartamentos from './pages/actions/AdminDepartamentos';
+import AdminEspecialidades from './pages/actions/AdminEspecialidades';
+import { Button } from 'react-bootstrap';
+import { FaExclamationTriangle } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 function AppRoutes() {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  const navigate = useNavigate();
 
   return (
     <>
@@ -23,6 +29,7 @@ function AppRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/users" element={<Users />} />
         <Route path="/citas" element={<Citas />} />
+        <Route path="/departamentos" element={<AdminDepartamentos />} />
       </Routes>
       <Outlet />
     </>

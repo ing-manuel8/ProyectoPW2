@@ -2,25 +2,30 @@ import React from 'react';
 import { Form, Button } from 'react-bootstrap';
 import { FaPaperPlane } from 'react-icons/fa';
 
-const ChatInput = ({ value, onChange, onSubmit }) => {
+const ChatInput = ({ value, onChange, onSubmit, isLoading }) => {
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!isLoading) {
+            onSubmit(value);
+        }
+    };
+
     return (
-        <Form onSubmit={onSubmit} className="w-100">
-            <div className="d-flex align-items-center">
-                <Form.Control
-                    type="text"
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    placeholder="Escribe tu mensaje..."
-                    className="me-2"
-                />
-                <Button 
-                    type="submit" 
-                    variant="primary"
-                    aria-label="Enviar mensaje"
-                >
-                    <FaPaperPlane />
-                </Button>
-            </div>
+        <Form onSubmit={handleSubmit} className="d-flex align-items-center">
+            <Form.Control
+                type="text"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder="Escribe tu mensaje..."
+                disabled={isLoading}
+            />
+            <Button 
+                type="submit" 
+                disabled={isLoading || !value.trim()}
+                className="ms-2"
+            >
+                <FaPaperPlane />
+            </Button>
         </Form>
     );
 };

@@ -4,7 +4,11 @@ const citasSchema = new mongoose.Schema({
     patient: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: [true, 'El paciente es requerido']
+        required: false
+    },
+    patientName: {
+        type: String,
+        required: [true, 'El nombre del paciente es requerido']
     },
     doctor: {
         type: mongoose.Schema.Types.ObjectId,

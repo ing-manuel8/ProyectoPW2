@@ -16,6 +16,7 @@ const Chatbot = () => {
         opcionesRapidas,
         opcionesAdicionales,
         mostrarMasOpciones,
+        isLoading,
         handleClose,
         handleShow,
         handleSendMessage,
@@ -95,6 +96,7 @@ const Chatbot = () => {
                         value={inputMessage}
                         onChange={setInputMessage}
                         onSubmit={handleSendMessage}
+                        isLoading={isLoading}
                     />
                 </Modal.Footer>
             </Modal>
