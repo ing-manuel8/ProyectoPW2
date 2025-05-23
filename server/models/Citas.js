@@ -17,9 +17,8 @@ const citasSchema = new mongoose.Schema({
     },
     department: {
         type: String,
-        required: [true, 'El departamento es requerido'],
-        enum: ['Medicina General', 'Pediatría', 'Ginecología', 'Cardiología', 'Dermatología', 'Oftalmología', 'Ortopedia', 'Neurología']
-    },
+        required: [true, 'El departamento es requerido']
+      },      
     date: {
         type: Date,
         required: [true, 'La fecha es requerida']

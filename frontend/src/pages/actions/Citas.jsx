@@ -11,6 +11,9 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { FaFilePdf } from 'react-icons/fa';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import CitaPDF from '../../components/pdf/CitaPDF';
 
 function Citas() {
 	const { user } = useAuth();
@@ -337,10 +340,26 @@ function Citas() {
 									<Button
 										variant="outline-danger"
 										size="sm"
+										className="me-2"
 										onClick={() => handleDelete(cita)}
 									>
 										<FaTrash /> Eliminar
 									</Button>
+									<PDFDownloadLink
+										document={<CitaPDF cita={cita} />}
+										fileName={`cita-${cita.patient?.username || 'paciente'}-${new Date(cita.date).toLocaleDateString()}.pdf`}
+									>
+										{({ blob, url, loading, error }) => (
+											<Button
+												variant="outline-primary"
+												size="sm"
+												disabled={loading}
+												className="me-2"
+											>
+												<FaFilePdf /> {loading ? 'Generando...' : 'PDF'}
+											</Button>
+										)}
+									</PDFDownloadLink>
 								</td>
 							</tr>
 						))}
